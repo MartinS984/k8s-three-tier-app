@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # 1. The Database
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432" # Optional: Only if you want to connect via a local tool like pgAdmin
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  # 2. The Backend API
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=postgres
+      - DB_HOST=db    # <--- The magic service name connection!
+      - DB_PORT=5432
+
+  # 3. The React Frontend
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      # React runs in the browser, so it must reach the backend via the host's URL
+      - VITE_API_URL=http://localhost:5000 
+    # This ensures hot-reloading works with Docker
+    volumes:
+      - ./frontend/src:/app/src 
+
+volumes:
+  db-data:

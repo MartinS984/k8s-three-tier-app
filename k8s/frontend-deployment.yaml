@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: three-tier-frontend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 3000  # Adjust if your frontend listens on port 80
+        env:
+        - name: VITE_API_URL     # <--- What is the Variable Name from your code?
+          value: http://127.0.0.1:41677     # <--- Internal Name (http://backend) OR External IP?
